@@ -14,6 +14,7 @@ export default function RootLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
       }}
     >
+      {/* Chord Recoginition */}
       <Tabs.Screen
         name="index"
         options={{
@@ -21,6 +22,18 @@ export default function RootLayout() {
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? "home" : "home-outline"}
+              color={"black"}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="tuning"
+        options={{
+          title: "Tuner",
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon
+              name={focused ? "musical-note" : "musical-note-outline"}
               color={"black"}
             />
           ),

@@ -1,9 +1,9 @@
 import { Text, View } from "react-native";
-import ChordRecognition from "@/components/ChordRecognition/ChordRecognition";
+import DigitalTuner from "@/components/Tuning/DigitalTuner";
 import Audio from "@/components/AudioFeed/Audio";
 
 // This is the home page of the App where AI Chord Recognition takes place
-export default function Index() {
+export default function tuning() {
   return (
     <View
       style={{
@@ -11,7 +11,7 @@ export default function Index() {
         flex: 1,
       }}
     >
-      <ChordRecognition />
+      <DigitalTuner />
       <Audio />
     </View>
   );
