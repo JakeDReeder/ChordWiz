@@ -1,44 +1,31 @@
-import { Tabs } from "expo-router";
-import React from "react";
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import { useEffect } from "react";
+import "react-native-reanimated";
 
-import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { Colors } from "@/constants/Colors";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [loaded] = useFonts({
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+  });
+
+  if (!loaded) {
+    return null;
+  }
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-      }}
-    >
-      {/* Chord Recoginition */}
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "ChordWiz",
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon
-              name={focused ? "home" : "home-outline"}
-              color={"black"}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="tuning"
-        options={{
-          title: "Tuner",
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon
-              name={focused ? "musical-note" : "musical-note-outline"}
-              color={"black"}
-            />
-          ),
-        }}
-      />
-    </Tabs>
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+    </ThemeProvider>
   );
 }
