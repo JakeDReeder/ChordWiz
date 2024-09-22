@@ -1,30 +1,33 @@
 import { Text, View } from "react-native";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { Colors } from "@/constants/Colors";
 
 export default function DigitalTuner() {
   return (
-    <View>
-      <View
+    <ThemedView>
+      <ThemedView
         style={{
           flexDirection: "row",
           height: 300,
           alignContent: "flex-end",
-          backgroundColor: "blue",
+          backgroundColor: Colors.dark.primary,
         }}
       >
-        <Text
+        <ThemedText
           style={{
             paddingLeft: 150,
             paddingTop: 100,
-            fontSize: 100,
+            fontSize: 120,
             alignSelf: "center",
           }}
         >
           A
-        </Text>
+        </ThemedText>
+      </ThemedView>
+      <View style={{ backgroundColor: Colors.dark.primary, height: 180 }}>
+        <ThemedText style={{ fontSize: 25 }}>TUNING METER HERE</ThemedText>
       </View>
-      <View style={{ backgroundColor: "red", height: 180 }}>
-        <Text style={{ fontSize: 25 }}>TUNING METER HERE</Text>
-      </View>
-    </View>
+    </ThemedView>
   );
 }
