@@ -1,15 +1,17 @@
 import { Text, View } from "react-native";
+import ChordRecognition from "@/components/ChordRecognition/ChordRecognition";
+import Audio from "@/components/AudioFeed/Audio";
 
 export default function Index() {
   return (
     <View
       style={{
+        flexDirection: "column",
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
       }}
     >
-      <Text>This is where the core functionality will be</Text>
+      <ChordRecognition />
+      <Audio />
     </View>
   );
 }
