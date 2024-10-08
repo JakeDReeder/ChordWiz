@@ -13,7 +13,7 @@ export default function ChordRecognition() {
           flexDirection: "row",
           alignItems: "center",
           backgroundColor: Colors.dark.primary,
-          height: 400,
+          height: 360,
         }}
       >
         <ThemedView

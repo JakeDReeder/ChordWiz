@@ -64,7 +64,7 @@ const ChromaticTuner: React.FC = () => {
           const detectedPitch = Math.random() * 880 + 220; // Random pitch between 220Hz and 1100Hz
           setPitch(detectedPitch);
           setNote(getNoteFromPitch(detectedPitch));
-        }, 100);
+        }, 1000);
       } catch (err) {
         console.error("Error in startPitchDetection:", err);
       }
@@ -116,12 +116,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Colors.dark.primary,
-    height: 480,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
+    height: 440,
   },
   pitch: {
     marginTop: 20,
@@ -130,7 +125,6 @@ const styles = StyleSheet.create({
   },
   note: {
     fontSize: 120,
-    fontWeight: "bold",
   },
 });
 

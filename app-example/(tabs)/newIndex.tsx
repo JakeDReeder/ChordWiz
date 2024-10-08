@@ -14,7 +14,7 @@ export default function ChordRecognitionScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <LiveAudioVisualizer isRecording={isRecording} />
+      <LiveAudioVisualizer />
       <ChordDisplay chord={recognizedChord} />
       <TouchableOpacity
         style={styles.button}
