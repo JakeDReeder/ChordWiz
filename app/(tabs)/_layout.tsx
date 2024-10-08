@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import React from "react";
-
+import { Image } from "react-native"; // Import Image
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
@@ -14,11 +14,17 @@ export default function RootLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
       }}
     >
-      {/* Chord Recoginition */}
+      {/* Chord Recognition */}
       <Tabs.Screen
         name="index"
         options={{
-          title: "ChordWiz",
+          headerTitle: () => (
+            <Image
+              source={require("@/assets/images/ChordWiz_transparent-.png")} // Path to your image
+              style={{ width: 150 }} // Adjust size as needed
+              resizeMode="contain"
+            />
+          ),
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? "home" : "home-outline"}
@@ -30,7 +36,13 @@ export default function RootLayout() {
       <Tabs.Screen
         name="tuning"
         options={{
-          title: "Tuner",
+          headerTitle: () => (
+            <Image
+              source={require("@/assets/images/ChordWiz_transparent-.png")} // Path to your image
+              style={{ width: 150 }} // Adjust size as needed
+              resizeMode="contain"
+            />
+          ),
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? "musical-note" : "musical-note-outline"}
