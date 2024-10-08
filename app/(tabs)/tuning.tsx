@@ -1,8 +1,12 @@
 import { Text, View } from "react-native";
-import DigitalTuner from "@/components/Tuning/DigitalTuner";
+import ChromaticTuner from "@/components/Tuning/ChromaticTuner";
+import LiveAudioVisualizer from "@/components/AudioFeed/LiveAudioVisualizer";
+import React, { useState } from "react";
 
 // This is the home page of the App where AI Chord Recognition takes place
 export default function tuning() {
+  const [isRecording, setIsRecording] = useState(true);
+
   return (
     <View
       style={{
@@ -10,7 +14,8 @@ export default function tuning() {
         flex: 1,
       }}
     >
-      <DigitalTuner />
+      <ChromaticTuner />
+      <LiveAudioVisualizer isRecording={isRecording} />
     </View>
   );
 }

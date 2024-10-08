@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { ThemedView } from "@/components/ThemedView";
+import { Colors } from "@/constants/Colors";
 
 import LiveAudioVisualizer from "@/components/AudioFeed/LiveAudioVisualizer";
 import ChromaticTuner from "@/components/Tuning/ChromaticTuner";
@@ -11,8 +13,7 @@ export default function ChordRecognitionScreen() {
   const [showTuner, setShowTuner] = useState(false);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Chord Recognition</Text>
+    <ThemedView style={styles.container}>
       <LiveAudioVisualizer isRecording={isRecording} />
       <ChordDisplay chord={recognizedChord} />
       <TouchableOpacity
@@ -32,16 +33,14 @@ export default function ChordRecognitionScreen() {
         </Text>
       </TouchableOpacity>
       {showTuner && <ChromaticTuner />}
-    </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: Colors.dark.background,
   },
   title: {
     fontSize: 24,
