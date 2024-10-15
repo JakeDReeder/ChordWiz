@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark.background,
-    height: "100%"
+    height: "100%",
   },
   title: {
     fontSize: 24,
@@ -49,4 +49,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
