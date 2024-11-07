@@ -1,130 +1,128 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Audio } from "expo-av";
-import { Colors } from "@/constants/Colors";
-import { ThemedText } from "../ThemedText";
+import LiveAudioStream from "react-native-live-audio-stream";
+import PitchFinder from "pitchfinder";
+
+const SAMPLE_RATE = 44100;
+const BUFFER_SIZE = 2048;
+
+const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+interface NoteInfo {
+  note: string;
+  cents: number;
+}
 
 const ChromaticTuner: React.FC = () => {
-  const [pitch, setPitch] = useState<number | null>(null);
-  const [note, setNote] = useState<string | null>(null);
+  const [currentNote, setCurrentNote] = useState<string>("--");
+  const [frequency, setFrequency] = useState<number>(0);
+  const [cents, setCents] = useState<number>(0);
+  const [isInTune, setIsInTune] = useState<boolean>(false);
+
+  // Convert frequency to note name and cents deviation
+  const frequencyToNote = (freq: number): NoteInfo => {
+    const midiNumber = 12 * (Math.log2(freq / 440) + 4.75);
+    const roundedMidi = Math.round(midiNumber);
+    const cents = Math.round((midiNumber - roundedMidi) * 100);
+    const noteName = notes[roundedMidi % 12];
+    const octave = Math.floor(roundedMidi / 12);
+    return { note: `${noteName}${octave}`, cents };
+  };
 
   useEffect(() => {
-    let recording: Audio.Recording | null = null;
-    let pitchDetector: NodeJS.Timeout | null = null;
+    // Initialize pitch detector
+    const detector = PitchFinder.YIN({ sampleRate: SAMPLE_RATE });
 
-    const startPitchDetection = async () => {
-      try {
-        const { status } = await Audio.requestPermissionsAsync();
-        if (status !== "granted") {
-          console.error("Audio permission not granted");
-          return;
-        }
-
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
-          playsInSilentModeIOS: true,
-        });
-
-        recording = new Audio.Recording();
-        try {
-          await recording.prepareToRecordAsync({
-            isMeteringEnabled: true,
-            android: {
-              extension: ".m4a",
-              outputFormat: Audio.AndroidOutputFormat.MPEG_4,
-              audioEncoder: Audio.AndroidAudioEncoder.AAC,
-              sampleRate: 44100,
-              numberOfChannels: 2,
-              bitRate: 128000,
-            },
-            ios: {
-              extension: ".m4a",
-              outputFormat: Audio.IOSOutputFormat.MPEG4AAC,
-              audioQuality: Audio.IOSAudioQuality.MAX,
-              sampleRate: 44100,
-              numberOfChannels: 2,
-              bitRate: 128000,
-              linearPCMBitDepth: 16,
-              linearPCMIsBigEndian: false,
-              linearPCMIsFloat: false,
-            },
-            web: {
-              mimeType: "audio/webm",
-              bitsPerSecond: 128000,
-            },
-          });
-          await recording.startAsync();
-        } catch (err) {
-          console.error("Failed to start recording", err);
-        }
-
-        // This is a placeholder for actual pitch detection logic
-        // You would typically use a pitch detection algorithm here
-        pitchDetector = setInterval(() => {
-          const detectedPitch = Math.random() * 880 + 220; // Random pitch between 220Hz and 1100Hz
-          setPitch(detectedPitch);
-          setNote(getNoteFromPitch(detectedPitch));
-        }, 1000);
-      } catch (err) {
-        console.error("Error in startPitchDetection:", err);
-      }
+    // Configure audio stream with 'wavFile' property
+    const options = {
+      sampleRate: SAMPLE_RATE,
+      bufferSize: BUFFER_SIZE,
+      channels: 1,
+      bitsPerSample: 16,
+      wavFile: "path_to_audio_file.wav", // Add path to audio file or empty string if not using a file
     };
 
-    startPitchDetection();
+    // Start audio stream
+    LiveAudioStream.init(options);
+    LiveAudioStream.start();
 
-    return () => {
-      if (pitchDetector) clearInterval(pitchDetector);
-      if (recording) {
-        recording.stopAndUnloadAsync();
+    // @ts-ignore Temporarily ignoring the TypeScript error for this workaround
+    const audioStream: any = LiveAudioStream;
+
+    // Process audio data
+    audioStream.onAudioData((data: Int16Array) => {
+      // Convert audio data to Float32Array
+      const buffer = new Float32Array(data.length / 2);
+      for (let i = 0; i < data.length; i += 2) {
+        buffer[i / 2] = ((data[i] | (data[i + 1] << 8)) << 16) >> 16;
       }
+
+      // Detect pitch
+      const pitch = detector(buffer);
+      if (pitch) {
+        setFrequency(Math.round(pitch));
+        const noteInfo = frequencyToNote(pitch);
+        setCurrentNote(noteInfo.note);
+        setCents(noteInfo.cents);
+        setIsInTune(Math.abs(noteInfo.cents) < 5);
+      }
+    });
+
+    // Cleanup
+    return () => {
+      LiveAudioStream.stop();
     };
   }, []);
 
-  const getNoteFromPitch = (frequency: number): string => {
-    const noteStrings = [
-      "C",
-      "C#",
-      "D",
-      "D#",
-      "E",
-      "F",
-      "F#",
-      "G",
-      "G#",
-      "A",
-      "A#",
-      "B",
-    ];
-    const noteNum = 12 * (Math.log(frequency / 440) / Math.log(2));
-    const roundedNoteNum = Math.round(noteNum) + 69;
-    return noteStrings[roundedNoteNum % 12];
-  };
-
   return (
     <View style={styles.container}>
-      <ThemedText style={styles.note}>{note || "N/A"}</ThemedText>
-      <ThemedText style={styles.pitch}>
-        Pitch: {pitch ? `${pitch.toFixed(2)} Hz` : "N/A"}
-      </ThemedText>
+      <Text style={styles.frequency}>{frequency.toFixed(1)} Hz</Text>
+      <Text style={styles.note}>{currentNote}</Text>
+      <View style={styles.tuningIndicator}>
+        <View
+          style={[
+            styles.indicator,
+            { backgroundColor: isInTune ? "#4CAF50" : "#FF5722" },
+          ]}
+        />
+      </View>
+      <Text style={styles.cents}>{cents > 0 ? `+${cents}` : cents} cents</Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    alignItems: "center",
+    flex: 1,
     justifyContent: "center",
-    backgroundColor: Colors.dark.primary,
-    height: 440,
+    alignItems: "center",
+    backgroundColor: "#F5FCFF",
   },
-  pitch: {
-    marginTop: 20,
-    fontSize: 16,
-    marginBottom: 5,
+  frequency: {
+    fontSize: 24,
+    marginBottom: 10,
   },
   note: {
-    fontSize: 120,
+    fontSize: 48,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  tuningIndicator: {
+    width: "80%",
+    height: 40,
+    backgroundColor: "#E0E0E0",
+    borderRadius: 20,
+    overflow: "hidden",
+    marginBottom: 10,
+  },
+  indicator: {
+    width: 20,
+    height: "100%",
+    borderRadius: 10,
+    transform: [{ translateX: 0 }],
+  },
+  cents: {
+    fontSize: 20,
   },
 });
 
