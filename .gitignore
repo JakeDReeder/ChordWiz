@@ -9,7 +9,6 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
-ChordWiz.code-workspace
 
 # macOS
 .DS_Store
