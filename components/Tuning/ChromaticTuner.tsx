@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import LiveAudioStream from "react-native-live-audio-stream";
+// import LiveAudioStream from "react-native-live-audio-stream"; // Commented out
 import PitchFinder from "pitchfinder";
 
 const SAMPLE_RATE = 44100;
@@ -14,12 +14,12 @@ interface NoteInfo {
 }
 
 const ChromaticTuner: React.FC = () => {
-  const [currentNote, setCurrentNote] = useState<string>("--");
-  const [frequency, setFrequency] = useState<number>(0);
+  const [currentNote, setCurrentNote] = useState<string>("A4");
+  const [frequency, setFrequency] = useState<number>(440);
   const [cents, setCents] = useState<number>(0);
-  const [isInTune, setIsInTune] = useState<boolean>(false);
+  const [isInTune, setIsInTune] = useState<boolean>(true);
 
-  // Convert frequency to note name and cents deviation
+  // Function to convert frequency to note name and cents deviation
   const frequencyToNote = (freq: number): NoteInfo => {
     const midiNumber = 12 * (Math.log2(freq / 440) + 4.75);
     const roundedMidi = Math.round(midiNumber);
@@ -30,48 +30,19 @@ const ChromaticTuner: React.FC = () => {
   };
 
   useEffect(() => {
-    // Initialize pitch detector
-    const detector = PitchFinder.YIN({ sampleRate: SAMPLE_RATE });
+    // Simulate frequency oscillation
+    const interval = setInterval(() => {
+      const simulatedFrequency = 440 + Math.sin(Date.now() / 1000) * 10; // Oscillate between 430 and 450 Hz
+      setFrequency(simulatedFrequency);
 
-    // Configure audio stream with 'wavFile' property
-    const options = {
-      sampleRate: SAMPLE_RATE,
-      bufferSize: BUFFER_SIZE,
-      channels: 1,
-      bitsPerSample: 16,
-      wavFile: "path_to_audio_file.wav", // Add path to audio file or empty string if not using a file
-    };
+      // Calculate note info based on the simulated frequency
+      const noteInfo = frequencyToNote(simulatedFrequency);
+      setCurrentNote(noteInfo.note);
+      setCents(noteInfo.cents);
+      setIsInTune(Math.abs(noteInfo.cents) < 5);
+    }, 100);
 
-    // Start audio stream
-    LiveAudioStream.init(options);
-    LiveAudioStream.start();
-
-    // @ts-ignore Temporarily ignoring the TypeScript error for this workaround
-    const audioStream: any = LiveAudioStream;
-
-    // Process audio data
-    audioStream.onAudioData((data: Int16Array) => {
-      // Convert audio data to Float32Array
-      const buffer = new Float32Array(data.length / 2);
-      for (let i = 0; i < data.length; i += 2) {
-        buffer[i / 2] = ((data[i] | (data[i + 1] << 8)) << 16) >> 16;
-      }
-
-      // Detect pitch
-      const pitch = detector(buffer);
-      if (pitch) {
-        setFrequency(Math.round(pitch));
-        const noteInfo = frequencyToNote(pitch);
-        setCurrentNote(noteInfo.note);
-        setCents(noteInfo.cents);
-        setIsInTune(Math.abs(noteInfo.cents) < 5);
-      }
-    });
-
-    // Cleanup
-    return () => {
-      LiveAudioStream.stop();
-    };
+    return () => clearInterval(interval); // Cleanup interval on unmount
   }, []);
 
   return (

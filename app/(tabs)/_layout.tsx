@@ -1,9 +1,10 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Image } from "react-native"; // Import Image
+import { Image } from "react-native";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
+import { RouteProp } from "@react-navigation/native";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -20,12 +21,14 @@ export default function RootLayout() {
         options={{
           headerTitle: () => (
             <Image
-              source={require("@/assets/images/ChordWiz_transparent-.png")} // Path to your image
-              style={{ width: 150 }} // Adjust size as needed
+              source={require("@/assets/images/ChordWiz_transparent-.png")}
+              style={{ width: 150 }}
               resizeMode="contain"
             />
           ),
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: (
+            { focused }: { focused: boolean } // Explicitly type `focused`
+          ) => (
             <TabBarIcon
               name={focused ? "home" : "home-outline"}
               color={"white"}
@@ -38,12 +41,14 @@ export default function RootLayout() {
         options={{
           headerTitle: () => (
             <Image
-              source={require("@/assets/images/ChordWiz_transparent-.png")} // Path to your image
-              style={{ width: 150 }} // Adjust size as needed
+              source={require("@/assets/images/ChordWiz_transparent-.png")}
+              style={{ width: 150 }}
               resizeMode="contain"
             />
           ),
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: (
+            { focused }: { focused: boolean } // Explicitly type `focused`
+          ) => (
             <TabBarIcon
               name={focused ? "musical-note" : "musical-note-outline"}
               color={"white"}
