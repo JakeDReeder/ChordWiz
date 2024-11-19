@@ -12,12 +12,15 @@ export default function ChordRecognition() {
         style={{
           flexDirection: "row",
           alignItems: "center",
-          backgroundColor: Colors.dark.primary,
+          backgroundColor: Colors.dark.secondary,
           height: 360,
         }}
       >
         <ThemedView
-          style={{ flexDirection: "row", backgroundColor: Colors.dark.primary }}
+          style={{
+            flexDirection: "row",
+            backgroundColor: Colors.dark.secondary,
+          }}
         >
           <ThemedText
             style={{ marginLeft: 150, fontSize: 130, alignSelf: "flex-start" }}

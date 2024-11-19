@@ -19,6 +19,7 @@ export default function RootLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          lazy: true,
           headerTitle: () => (
             <Image
               source={require("@/assets/images/ChordWiz_transparent-.png")}
@@ -39,6 +40,7 @@ export default function RootLayout() {
       <Tabs.Screen
         name="tuning"
         options={{
+          lazy: true,
           headerTitle: () => (
             <Image
               source={require("@/assets/images/ChordWiz_transparent-.png")}

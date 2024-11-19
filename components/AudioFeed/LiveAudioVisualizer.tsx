@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { View, StyleSheet, Dimensions, Animated, Text } from "react-native";
+import { Colors } from "@/constants/Colors";
 
 const FFT_SIZE = 128;
 const MAX_DB = 0;
@@ -38,11 +39,11 @@ const LiveAudioVisualizer: React.FC = () => {
   useEffect(() => {
     if (!isActive) return;
 
-    // Update the visualization periodically
+    // Update the visualization periodically with a slower interval
     const intervalId = setInterval(() => {
       const fftResult = generateSimulatedData();
       updateVisualization(fftResult);
-    }, 100);
+    }, 500); // Slowed down to update every 500ms
 
     return () => clearInterval(intervalId);
   }, [isActive, generateSimulatedData, updateVisualization]);
@@ -89,7 +90,6 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#000",
     padding: 16,
-    borderRadius: 16,
     height: 300,
   },
   buttonText: {
