@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { View, StyleSheet, Dimensions, Animated, Text } from "react-native";
 import { Colors } from "@/constants/Colors";
+import { NativeEventEmitter, NativeModules } from "react-native";
+
+const { MyAudioModule } = NativeModules;
+const audioModuleEmitter = new NativeEventEmitter(MyAudioModule);
+
+// Listen for audio data events
+audioModuleEmitter.addListener("onAudioData", (event) => {
+  console.log("Received RMS:", event.rms);
+});
 
 const FFT_SIZE = 128;
 const MAX_DB = 0;
