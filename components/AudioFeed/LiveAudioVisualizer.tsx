@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, StyleSheet, Dimensions, Animated, Text } from "react-native";
-import { Colors } from "@/constants/Colors";
-import { NativeEventEmitter, NativeModules } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  Animated,
+  Text,
+  NativeEventEmitter,
+  NativeModules,
+} from "react-native";
 
 const { MyAudioModule } = NativeModules;
 const audioModuleEmitter = new NativeEventEmitter(MyAudioModule);
 
-// Listen for audio data events
-audioModuleEmitter.addListener("onAudioData", (event) => {
-  console.log("Received RMS:", event.rms);
-});
-
-const FFT_SIZE = 128;
-const MAX_DB = 0;
-const MIN_DB = -100;
+const FFT_SIZE = 128; // Number of bars in the visualizer
+const MAX_RMS = 1.0; // Maximum RMS value (normalized)
+const MIN_RMS = 0.0; // Minimum RMS value (normalized)
 
 const LiveAudioVisualizer: React.FC = () => {
   const [bars] = useState(() =>
@@ -23,18 +24,14 @@ const LiveAudioVisualizer: React.FC = () => {
   );
   const [isActive, setIsActive] = useState(true);
 
-  // Generates simulated random audio data for visualization
-  const generateSimulatedData = useCallback(() => {
-    return Array(FFT_SIZE)
-      .fill(0)
-      .map(() => Math.random() * (MAX_DB - MIN_DB) + MIN_DB);
-  }, []);
-
   const updateVisualization = useCallback(
-    (fftResult: number[]) => {
-      fftResult.forEach((value, index) => {
-        const normalizedValue = (value - MIN_DB) / (MAX_DB - MIN_DB);
-        Animated.spring(bars[index], {
+    (rms: number) => {
+      // Normalize RMS to fit the bar visualization
+      const normalizedValue = (rms - MIN_RMS) / (MAX_RMS - MIN_RMS);
+
+      // Update all bars to reflect the current RMS value
+      bars.forEach((animatedValue) => {
+        Animated.spring(animatedValue, {
           toValue: normalizedValue,
           useNativeDriver: false,
           tension: 40,
@@ -48,14 +45,24 @@ const LiveAudioVisualizer: React.FC = () => {
   useEffect(() => {
     if (!isActive) return;
 
-    // Update the visualization periodically with a slower interval
-    const intervalId = setInterval(() => {
-      const fftResult = generateSimulatedData();
-      updateVisualization(fftResult);
-    }, 500); // Slowed down to update every 500ms
+    // Start recording when the component mounts
+    MyAudioModule.startRecording();
 
-    return () => clearInterval(intervalId);
-  }, [isActive, generateSimulatedData, updateVisualization]);
+    // Listen for RMS data from the native audio module
+    const subscription = audioModuleEmitter.addListener(
+      "onAudioData",
+      (event) => {
+        const rms = event.rms || 0; // Use the RMS value from the event
+        updateVisualization(rms);
+      }
+    );
+
+    return () => {
+      // Clean up: stop recording and remove the event listener
+      MyAudioModule.stopRecording();
+      subscription.remove();
+    };
+  }, [isActive, updateVisualization]);
 
   const renderBars = () => {
     const { width: screenWidth } = Dimensions.get("window");
