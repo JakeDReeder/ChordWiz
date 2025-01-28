@@ -1,98 +1,92 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  StyleSheet,
-  Dimensions,
-  Animated,
-  Text,
-  NativeEventEmitter,
-  NativeModules,
-} from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { View, StyleSheet, Animated } from "react-native";
+import { Audio } from "expo-av";
 
-const FFT_SIZE = 128; // Number of bars in the visualizer
-const MAX_RMS = 1.0; // Maximum RMS value (normalized)
-const MIN_RMS = 0.0; // Minimum RMS value (normalized)
+const FFT_SIZE = 32; // Reduced from 128 for better performance
 
-const LiveAudioVisualizer: React.FC = () => {
-  const [bars] = useState(() =>
+interface LiveAudioVisualizerProps {
+  isRecording: boolean;
+  recording?: Audio.Recording;
+}
+
+const LiveAudioVisualizer: React.FC<LiveAudioVisualizerProps> = ({
+  isRecording,
+  recording,
+}) => {
+  const [bars] = useState<Animated.Value[]>(
     Array(FFT_SIZE)
       .fill(0)
       .map(() => new Animated.Value(0))
   );
-  const [isActive, setIsActive] = useState(true);
 
-  const updateVisualization = useCallback(
-    (rms: number) => {
-      // Normalize RMS to fit the bar visualization
-      const normalizedValue = (rms - MIN_RMS) / (MAX_RMS - MIN_RMS);
+  const analyzeAudio = async (status: Audio.RecordingStatus) => {
+    if (status.isRecording) {
+      // Get metering info from status
+      const dB = status.metering ?? -160; // Metering ranges from -160 to 0
+      const normalized = (dB + 160) / 160; // Normalize to 0-1 range
 
-      // Update all bars to reflect the current RMS value
-      bars.forEach((animatedValue) => {
-        Animated.spring(animatedValue, {
-          toValue: normalizedValue,
+      // Animate bars with random variations for visual effect
+      bars.forEach((animatedValue, index) => {
+        const variation = 0.7 + Math.random() * 0.3;
+        Animated.timing(animatedValue, {
+          toValue: normalized * variation,
+          duration: 50,
           useNativeDriver: false,
-          tension: 40,
-          friction: 5,
         }).start();
       });
-    },
-    [bars]
-  );
-
-  const renderBars = () => {
-    const { width: screenWidth } = Dimensions.get("window");
-    const barWidth = (screenWidth - 32) / FFT_SIZE;
-    const gap = 2;
-
-    return (
-      <View style={styles.visualizer}>
-        {bars.map((animatedValue, index) => (
-          <Animated.View
-            key={index}
-            style={[
-              styles.bar,
-              {
-                width: barWidth - gap,
-                height: animatedValue.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ["0%", "100%"],
-                }),
-                backgroundColor: animatedValue.interpolate({
-                  inputRange: [0, 0.5, 1],
-                  outputRange: ["#4CAF50", "#FFC107", "#FF5722"],
-                }),
-              },
-            ]}
-          />
-        ))}
-      </View>
-    );
+    }
   };
 
-  return <View style={styles.container}>{renderBars()}</View>;
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (isRecording && recording) {
+      interval = setInterval(async () => {
+        const status = await recording.getStatusAsync();
+        analyzeAudio(status);
+      }, 50);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isRecording, recording]);
+
+  return (
+    <View style={styles.visualizer}>
+      {bars.map((animatedValue, index) => (
+        <Animated.View
+          key={index}
+          style={[
+            styles.bar,
+            {
+              height: animatedValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: ["0%", "100%"],
+              }),
+            },
+          ]}
+        />
+      ))}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#000",
-    padding: 16,
-    height: 300,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    marginBottom: 10,
-  },
   visualizer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
     height: "100%",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
   },
   bar: {
+    width: 4,
+    backgroundColor: "#4CAF50",
     marginHorizontal: 1,
-    borderTopLeftRadius: 2,
-    borderTopRightRadius: 2,
+    borderRadius: 2,
   },
 });
 
