@@ -9,9 +9,6 @@ import {
   NativeModules,
 } from "react-native";
 
-const { MyAudioModule } = NativeModules;
-const audioModuleEmitter = new NativeEventEmitter(MyAudioModule);
-
 const FFT_SIZE = 128; // Number of bars in the visualizer
 const MAX_RMS = 1.0; // Maximum RMS value (normalized)
 const MIN_RMS = 0.0; // Minimum RMS value (normalized)
@@ -41,28 +38,6 @@ const LiveAudioVisualizer: React.FC = () => {
     },
     [bars]
   );
-
-  useEffect(() => {
-    if (!isActive) return;
-
-    // Start recording when the component mounts
-    MyAudioModule.startRecording();
-
-    // Listen for RMS data from the native audio module
-    const subscription = audioModuleEmitter.addListener(
-      "onAudioData",
-      (event) => {
-        const rms = event.rms || 0; // Use the RMS value from the event
-        updateVisualization(rms);
-      }
-    );
-
-    return () => {
-      // Clean up: stop recording and remove the event listener
-      MyAudioModule.stopRecording();
-      subscription.remove();
-    };
-  }, [isActive, updateVisualization]);
 
   const renderBars = () => {
     const { width: screenWidth } = Dimensions.get("window");
@@ -94,12 +69,7 @@ const LiveAudioVisualizer: React.FC = () => {
     );
   };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.buttonText}>{isActive ? "Active" : "Inactive"}</Text>
-      {renderBars()}
-    </View>
-  );
+  return <View style={styles.container}>{renderBars()}</View>;
 };
 
 const styles = StyleSheet.create({
