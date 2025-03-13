@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 import React from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { Image, StyleSheet } from "react-native";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 
@@ -14,9 +14,11 @@ export default function RootLayout() {
         name="index"
         options={{
           headerTitle: () => (
-            <View style={styles.logoContainer}>
-              <Image source={require(logo)} style={styles.logo} />
-            </View>
+            <Image
+              source={require(logo)}
+              style={{ width: 150 }}
+              resizeMode="contain"
+            />
           ),
           headerTitleAlign: "left",
           headerStyle: { backgroundColor: "#252525" },
@@ -25,16 +27,3 @@ export default function RootLayout() {
     </Stack>
   );
 }
-
-const styles = StyleSheet.create({
-  logoContainer: {
-    flex: 1,
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  logo: {
-    height: "100%",
-    resizeMode: "contain",
-  },
-});
