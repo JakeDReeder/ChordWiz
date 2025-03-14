@@ -1,26 +1,30 @@
 import React from "react";
 import { View, StyleSheet, Text } from "react-native";
+import { ThemedText } from "../ThemedText";
+import { ThemedView } from "../ThemedView";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { Colors } from "@/constants/Colors";
 
 const ChromaticTuner: React.FC = () => {
+  const colorScheme = useColorScheme();
+  const styles = StyleSheet.create({
+    container: {
+      flex: 6,
+      justifyContent: "center",
+      backgroundColor: Colors[colorScheme ?? "light"].background2,
+      alignItems: "center",
+    },
+    text: {
+      fontSize: 18,
+    },
+  });
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Chromatic Tuner</Text>
-    </View>
+    <ThemedView style={styles.container}>
+      <ThemedText type="defaultBold" style={styles.text}>
+        Chromatic Tuner
+      </ThemedText>
+    </ThemedView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 5.5, // 55% of the total 10 flex units
-    backgroundColor: "lightgreen",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  text: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "white",
-  },
-});
 
 export default ChromaticTuner;

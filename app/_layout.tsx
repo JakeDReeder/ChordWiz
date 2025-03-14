@@ -24,11 +24,17 @@ export default function RootLayout() {
               resizeMode="contain"
             />
           ),
-          headerStyle: { backgroundColor: "#252525" },
+          headerStyle: {
+            backgroundColor: Colors[colorScheme ?? "light"].secondary,
+          },
+          tabBarStyle: {
+            backgroundColor: Colors[colorScheme ?? "light"].secondary,
+          },
+          title: "",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? "home" : "home-outline"}
-              color={"white"}
+              color={color}
             />
           ),
         }}

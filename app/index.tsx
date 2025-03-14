@@ -10,17 +10,15 @@ import React from "react";
 import ChordDisplay from "@/components/ChordRecognition/ChordDisplay";
 import ChromaticTuner from "@/components/InstrumentTuning/ChromaticTuner";
 import Waveform from "@/components/WaveformVisual/Waveform";
-
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { ThemedView } from "@/components/ThemedView";
 
 export default function Index() {
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       <ChordDisplay />
       <ChromaticTuner />
       <Waveform />
-    </View>
+    </ThemedView>
   );
 }
 
