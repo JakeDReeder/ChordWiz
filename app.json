@@ -32,7 +32,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "@siteed/expo-audio-studio"
     ],
     "experiments": {
       "typedRoutes": true

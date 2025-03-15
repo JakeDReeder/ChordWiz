@@ -18,13 +18,13 @@ const ChordDisplay: React.FC = () => {
       padding: 20,
     },
     text: {
-      fontSize: 22,
+      fontSize: 18,
     },
   });
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="defaultBold" style={styles.text}>
-        A Major 7th, 9th Chord
+      <ThemedText type="defaultSemiBold" style={styles.text}>
+        Chord Recognition Currently Unavailable
       </ThemedText>
     </ThemedView>
   );
