@@ -2,7 +2,7 @@
 
 import { ExpoAudioStreamModule } from "@siteed/expo-audio-studio";
 
-const requestPermissions = async () => {
+export const requestPermissions = async () => {
   const { granted } = await ExpoAudioStreamModule.requestPermissionsAsync();
   if (granted) {
     console.log("Microphone permissions granted");
@@ -10,5 +10,3 @@ const requestPermissions = async () => {
     console.log("Microphone permissions denied");
   }
 };
-
-requestPermissions();

@@ -6,7 +6,7 @@
 
 import { Button, View, StyleSheet } from "react-native";
 import React from "react";
-
+import { requestPermissions } from "@/constants/requestPermissions";
 import ChordDisplay from "@/components/ChordRecognition/ChordDisplay";
 import ChromaticTuner from "@/components/InstrumentTuning/ChromaticTuner";
 import Waveform from "@/components/WaveformVisual/Waveform";
@@ -19,6 +19,9 @@ import {
   useSharedAudioRecorder,
   RecordingConfig,
 } from "@siteed/expo-audio-studio";
+
+// Requesting permission for microphone
+requestPermissions();
 
 export default function Index() {
   return (
