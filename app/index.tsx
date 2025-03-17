@@ -9,7 +9,7 @@ import React from "react";
 import { requestPermissions } from "@/constants/requestPermissions";
 import ChordDisplay from "@/components/ChordRecognition/ChordDisplay";
 import ChromaticTuner from "@/components/InstrumentTuning/ChromaticTuner";
-import Waveform from "@/components/WaveformVisual/Waveform";
+import WaveformVisual from "@/components/WaveformVisual/Waveform";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 
@@ -19,11 +19,13 @@ import {
   useSharedAudioRecorder,
   RecordingConfig,
 } from "@siteed/expo-audio-studio";
+import { CandleData } from "@siteed/expo-audio-ui";
 
 // Requesting permission for microphone
 requestPermissions();
 
 export default function Index() {
+  const { analysisData } = useSharedAudioRecorder();
   return (
     <AudioRecorderProvider
       config={{
@@ -34,7 +36,12 @@ export default function Index() {
       <ThemedView style={styles.container}>
         <ChordDisplay />
         <ChromaticTuner />
-        <Waveform />
+        <WaveformVisual
+          activePoints={(analysisData?.dataPoints || []).map((dp) => ({
+            ...dp,
+            visible: true,
+          }))}
+        />
         <RecordingControls />
         <RecordingStatus />
       </ThemedView>
@@ -49,14 +56,8 @@ const styles = StyleSheet.create({
 });
 
 function RecordingControls() {
-  const {
-    startRecording,
-    stopRecording,
-    pauseRecording,
-    resumeRecording,
-    isRecording,
-    isPaused,
-  } = useSharedAudioRecorder();
+  const { startRecording, stopRecording, isRecording, isPaused } =
+    useSharedAudioRecorder();
 
   const handleStartRecording = async () => {
     const config: RecordingConfig = {
@@ -76,14 +77,6 @@ function RecordingControls() {
 
       {isRecording && (
         <>
-          <Button title="Pause Recording" onPress={pauseRecording} />
-          <Button title="Stop Recording" onPress={stopRecording} />
-        </>
-      )}
-
-      {isPaused && (
-        <>
-          <Button title="Resume Recording" onPress={resumeRecording} />
           <Button title="Stop Recording" onPress={stopRecording} />
         </>
       )}
@@ -100,7 +93,7 @@ function RecordingStatus() {
 
   return (
     <ThemedView>
-      <ThemedText>Status: {isRecording ? "Recording" : "Paused"}</ThemedText>
+      <ThemedText>Status: {isRecording}</ThemedText>
       <ThemedText>Duration: {durationMs / 1000} seconds</ThemedText>
       <ThemedText>Size: {size} bytes</ThemedText>
     </ThemedView>

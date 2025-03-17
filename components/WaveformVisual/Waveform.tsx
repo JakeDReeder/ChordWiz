@@ -4,27 +4,36 @@ import { ThemedText } from "../ThemedText";
 import { ThemedView } from "../ThemedView";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
+import { Waveform, CandleData } from "@siteed/expo-audio-ui";
 
-const Waveform: React.FC = () => {
+interface WaveformVisualProps {
+  activePoints: CandleData[];
+}
+
+const WaveformVisual: React.FC<WaveformVisualProps> = ({ activePoints }) => {
   const colorScheme = useColorScheme();
   const styles = StyleSheet.create({
     container: {
       flex: 3,
-      justifyContent: "center",
-      backgroundColor: Colors[colorScheme ?? "light"].background3,
-      alignItems: "center",
-    },
-    text: {
-      fontSize: 18,
     },
   });
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="defaultBold" style={styles.text}>
-        Audio Waveform
-      </ThemedText>
+      <Waveform
+        activePoints={activePoints}
+        canvasHeight={50}
+        canvasWidth={100}
+        minAmplitude={0}
+        maxAmplitude={1} // Adjust based on your data
+        theme={{
+          color: Colors[colorScheme ?? "light"].primary,
+          strokeWidth: 2,
+          opacity: 1,
+        }}
+        smoothing={true}
+      />
     </ThemedView>
   );
 };
 
-export default Waveform;
+export default WaveformVisual;
