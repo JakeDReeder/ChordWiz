@@ -9,7 +9,7 @@ import React from "react";
 import { requestPermissions } from "@/constants/requestPermissions";
 import ChordDisplay from "@/components/ChordRecognition/ChordDisplay";
 import ChromaticTuner from "@/components/InstrumentTuning/ChromaticTuner";
-import WaveformVisual from "@/components/WaveformVisual/Waveform";
+import AudioVisual from "@/components/AudioVisual/LiveAudioVisual";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 
@@ -25,7 +25,6 @@ import { CandleData } from "@siteed/expo-audio-ui";
 requestPermissions();
 
 export default function Index() {
-  const { analysisData } = useSharedAudioRecorder();
   return (
     <AudioRecorderProvider
       config={{
@@ -36,12 +35,7 @@ export default function Index() {
       <ThemedView style={styles.container}>
         <ChordDisplay />
         <ChromaticTuner />
-        <WaveformVisual
-          activePoints={(analysisData?.dataPoints || []).map((dp) => ({
-            ...dp,
-            visible: true,
-          }))}
-        />
+        <AudioVisual />
         <RecordingControls />
         <RecordingStatus />
       </ThemedView>
