@@ -4,6 +4,10 @@ import { Image } from "react-native";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
+import { RouteProp } from "@react-navigation/native";
+import { requestPermissions } from "@/constants/requestPermissions";
+
+requestPermissions();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -14,9 +18,11 @@ export default function RootLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
       }}
     >
+      {/* Chord Recognition */}
       <Tabs.Screen
         name="index"
         options={{
+          lazy: true,
           headerTitle: () => (
             <Image
               source={require("@/assets/images/ChordWiz_transparent.png")}
@@ -30,11 +36,35 @@ export default function RootLayout() {
           tabBarStyle: {
             backgroundColor: Colors[colorScheme ?? "light"].secondary,
           },
-          title: "",
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ focused }: { focused: boolean }) => (
             <TabBarIcon
               name={focused ? "home" : "home-outline"}
-              color={color}
+              color={"white"}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="tuning"
+        options={{
+          lazy: true,
+          headerTitle: () => (
+            <Image
+              source={require("@/assets/images/ChordWiz_transparent.png")}
+              style={{ width: 150 }}
+              resizeMode="contain"
+            />
+          ),
+          headerStyle: {
+            backgroundColor: Colors[colorScheme ?? "light"].secondary,
+          },
+          tabBarStyle: {
+            backgroundColor: Colors[colorScheme ?? "light"].secondary,
+          },
+          tabBarIcon: ({ focused }: { focused: boolean }) => (
+            <TabBarIcon
+              name={focused ? "musical-note" : "musical-note-outline"}
+              color={"white"}
             />
           ),
         }}

@@ -21,10 +21,11 @@ const AudioVisual: React.FC = () => {
         <AudioVisualizer
           candleSpace={1}
           candleWidth={2}
-          canvasHeight={100}
+          canvasHeight={150}
           mode="live"
           disableTapSelection={true}
           audioData={analysisData}
+          amplitudeScaling="normalized"
         />
       )}
     </ThemedView>

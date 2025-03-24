@@ -5,8 +5,8 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint"
@@ -23,6 +23,7 @@
     "@shopify/react-native-skia": "^1.11.18",
     "@siteed/expo-audio-studio": "^2.1.1",
     "@siteed/expo-audio-ui": "^0.4.0",
+    "buffer": "^6.0.3",
     "expo": "~52.0.38",
     "expo-blur": "~14.0.3",
     "expo-constants": "~17.0.8",
@@ -43,6 +44,7 @@
     "react-dom": "18.3.1",
     "react-native": "0.76.7",
     "react-native-gesture-handler": "~2.20.2",
+    "react-native-live-audio-stream": "^1.1.1",
     "react-native-reanimated": "~3.16.1",
     "react-native-safe-area-context": "^4.12.0",
     "react-native-screens": "~4.4.0",
