@@ -1,60 +1,68 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, StyleSheet } from "react-native";
 import { ThemedText } from "../ThemedText";
-import { useSharedAudioRecorder } from "@siteed/expo-audio-studio";
-import * as PitchFinder from "pitchfinder";
+import LiveAudioStream from "react-native-live-audio-stream";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import TuningMeter from "./TuningMeter";
-
-const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+import { Buffer } from "buffer";
+import { getPitchedNote, ACCIDENTAL_MODE } from "@/services/pitch.service";
 
 const ChromaticTuner: React.FC = () => {
   const colorScheme = useColorScheme();
   const [frequency, setFrequency] = useState<number | null>(null);
   const [currentNote, setCurrentNote] = useState<string>("-");
   const [cents, setCents] = useState<number>(0);
-  const pitchDetector = PitchFinder.YIN();
-  const { startRecording, isRecording, isPaused } = useSharedAudioRecorder();
+  const [octave, setOctave] = useState<number>(4); // Track the octave of the note
+  const pitchDetector = new (require("pitchfinder").YIN)(); // Assuming you are using YIN for pitch detection
+
+  // Store previous frequency to minimize unnecessary updates
+  const lastFrequencyRef = useRef<number | null>(null);
+  const lastNoteRef = useRef<string>("-");
 
   useEffect(() => {
-    if (!isRecording && !isPaused) {
-      startRecording({
-        sampleRate: 44100,
-        channels: 1,
-        encoding: "pcm_16bit",
-        interval: 100,
-        onAudioStream: async (event) => {
-          let floatBuffer;
-          if (typeof event.data === "string") {
-            const binaryString = atob(event.data);
-            const buffer = new ArrayBuffer(binaryString.length);
-            const view = new Uint8Array(buffer);
-            for (let i = 0; i < binaryString.length; i++) {
-              view[i] = binaryString.charCodeAt(i);
-            }
-            floatBuffer = new Float32Array(buffer);
-          } else {
-            floatBuffer = new Float32Array(event.data);
-          }
+    LiveAudioStream.init({
+      sampleRate: 44100,
+      channels: 1,
+      bitsPerSample: 8,
+      audioSource: 9,
+      bufferSize: 4096,
+      wavFile: "",
+    });
 
-          const detectedFreq = pitchDetector(floatBuffer);
-          if (detectedFreq) {
-            setFrequency(detectedFreq);
-            const midiNumber = Math.round(
-              12 * (Math.log2(detectedFreq / 440) + 4.75)
-            );
-            setCurrentNote(notes[midiNumber % 12]);
-            setCents(
-              Math.round(
-                (12 * (Math.log2(detectedFreq / 440) + 4.75) - midiNumber) * 100
-              )
-            );
-          }
-        },
-      });
-    }
-  }, [isRecording, isPaused]);
+    const handleAudioData = (data: string) => {
+      const floatBuffer = new Float32Array(Buffer.from(data, "base64"));
+      const detectedFreq = pitchDetector(floatBuffer);
+
+      if (detectedFreq && detectedFreq !== lastFrequencyRef.current) {
+        const pitchedNote = getPitchedNote(detectedFreq, ACCIDENTAL_MODE.SHARP); // Use the service function
+
+        // Only update if there's a change in note or frequency
+        if (
+          pitchedNote.note !== lastNoteRef.current ||
+          detectedFreq !== lastFrequencyRef.current
+        ) {
+          setFrequency(pitchedNote.frequency);
+          setCurrentNote(
+            pitchedNote.note + (pitchedNote.accidental === "sharp" ? "#" : "")
+          );
+          setCents(pitchedNote.cents);
+          setOctave(pitchedNote.octave);
+
+          // Store the last values to avoid redundant updates
+          lastFrequencyRef.current = detectedFreq;
+          lastNoteRef.current = pitchedNote.note;
+        }
+      }
+    };
+
+    LiveAudioStream.on("data", handleAudioData);
+    LiveAudioStream.start();
+
+    return () => {
+      LiveAudioStream.stop();
+    };
+  }, []);
 
   return (
     <View

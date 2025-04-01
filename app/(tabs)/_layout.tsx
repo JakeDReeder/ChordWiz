@@ -4,7 +4,6 @@ import { Image } from "react-native";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
-import { RouteProp } from "@react-navigation/native";
 import { requestPermissions } from "@/constants/requestPermissions";
 
 export default function RootLayout() {

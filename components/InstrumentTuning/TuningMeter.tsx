@@ -25,13 +25,13 @@ const TuningMeter: React.FC<NoteInfo> = ({ cents }) => {
   return (
     <View style={styles.meterContainer}>
       {DEVIATION_BARS.map((bar, index) => (
-        <Animated.View
+        <View
           key={bar.threshold}
           style={[
             styles.bar,
             {
               backgroundColor: bar.color,
-              opacity: Math.abs(cents - bar.threshold) < 5 ? 1 : 0.2,
+              opacity: Math.abs(cents + bar.threshold) < 5 ? 1 : 0.2,
               height: 80 - Math.abs(bar.threshold) * 2,
             },
           ]}
