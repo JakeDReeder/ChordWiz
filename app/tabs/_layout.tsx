@@ -7,10 +7,9 @@ import { Colors } from "@/constants/Colors";
 import { RouteProp } from "@react-navigation/native";
 import { requestPermissions } from "@/constants/requestPermissions";
 
-requestPermissions();
-
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  requestPermissions();
 
   return (
     <Tabs
@@ -39,31 +38,6 @@ export default function RootLayout() {
           tabBarIcon: ({ focused }: { focused: boolean }) => (
             <TabBarIcon
               name={focused ? "home" : "home-outline"}
-              color={"white"}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="tuning"
-        options={{
-          lazy: true,
-          headerTitle: () => (
-            <Image
-              source={require("@/assets/images/ChordWiz_transparent.png")}
-              style={{ width: 150 }}
-              resizeMode="contain"
-            />
-          ),
-          headerStyle: {
-            backgroundColor: Colors[colorScheme ?? "light"].secondary,
-          },
-          tabBarStyle: {
-            backgroundColor: Colors[colorScheme ?? "light"].secondary,
-          },
-          tabBarIcon: ({ focused }: { focused: boolean }) => (
-            <TabBarIcon
-              name={focused ? "musical-note" : "musical-note-outline"}
               color={"white"}
             />
           ),

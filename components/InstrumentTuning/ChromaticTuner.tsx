@@ -1,80 +1,76 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { ThemedText } from "../ThemedText";
-import { ThemedView } from "../ThemedView";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useSharedAudioRecorder } from "@siteed/expo-audio-studio";
+import * as PitchFinder from "pitchfinder";
 import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/useColorScheme";
 import TuningMeter from "./TuningMeter";
 
 const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
-const DEVIATION_BARS = [
-  { threshold: 30, color: "#FF5252" }, // Red
-  { threshold: 20, color: "#FF7B39" }, // Orange
-  { threshold: 15, color: "#FFB039" }, // Light Orange
-  { threshold: 10, color: "#FFE339" }, // Yellow
-  { threshold: 5, color: "#B4FF39" }, // Light Green
-  { threshold: 0, color: "#4CAF50" }, // Green
-  { threshold: -5, color: "#B4FF39" }, // Light Green
-  { threshold: -10, color: "#FFE339" }, // Yellow
-  { threshold: -15, color: "#FFB039" }, // Light Orange
-  { threshold: -20, color: "#FF7B39" }, // Orange
-  { threshold: -30, color: "#FF5252" }, // Red
-];
-
-interface NoteInfo {
-  note: string;
-  cents: number;
-}
-
 const ChromaticTuner: React.FC = () => {
   const colorScheme = useColorScheme();
-
-  const componentStyles = StyleSheet.create({
-    container: {
-      flex: 6,
-      justifyContent: "center",
-      backgroundColor: Colors[colorScheme ?? "light"].background2,
-      alignItems: "center",
-    },
-  });
-
-  const [currentNote, setCurrentNote] = useState<string>("A");
-  const [frequency, setFrequency] = useState<number>(440);
+  const [frequency, setFrequency] = useState<number | null>(null);
+  const [currentNote, setCurrentNote] = useState<string>("-");
   const [cents, setCents] = useState<number>(0);
-  const [isInTune, setIsInTune] = useState<boolean>(true);
-
-  // Function to convert frequency to note name and cents deviation
-  const frequencyToNote = (freq: number): NoteInfo => {
-    const midiNumber = 12 * (Math.log2(freq / 440) + 4.75);
-    const roundedMidi = Math.round(midiNumber);
-    const cents = Math.round((midiNumber - roundedMidi) * 100);
-    const noteName = notes[roundedMidi % 12];
-    return { note: noteName, cents };
-  };
+  const pitchDetector = PitchFinder.YIN();
+  const { startRecording, isRecording, isPaused } = useSharedAudioRecorder();
 
   useEffect(() => {
-    // Simulate frequency oscillation with a slower interval
-    const interval = setInterval(() => {
-      const simulatedFrequency = 440 + Math.sin(Date.now() / 1500) * 10; // Oscillate between 430 and 450 Hz
-      setFrequency(simulatedFrequency);
+    if (!isRecording && !isPaused) {
+      startRecording({
+        sampleRate: 44100,
+        channels: 1,
+        encoding: "pcm_16bit",
+        interval: 100,
+        onAudioStream: async (event) => {
+          let floatBuffer;
+          if (typeof event.data === "string") {
+            const binaryString = atob(event.data);
+            const buffer = new ArrayBuffer(binaryString.length);
+            const view = new Uint8Array(buffer);
+            for (let i = 0; i < binaryString.length; i++) {
+              view[i] = binaryString.charCodeAt(i);
+            }
+            floatBuffer = new Float32Array(buffer);
+          } else {
+            floatBuffer = new Float32Array(event.data);
+          }
 
-      // Calculate note info based on the simulated frequency
-      const noteInfo = frequencyToNote(simulatedFrequency);
-      setCurrentNote(noteInfo.note);
-      setCents(noteInfo.cents);
-      setIsInTune(Math.abs(noteInfo.cents) < 5);
-    }, 200); // Slowed down to update every 200ms
-
-    return () => clearInterval(interval); // Cleanup interval on unmount
-  }, []);
+          const detectedFreq = pitchDetector(floatBuffer);
+          if (detectedFreq) {
+            setFrequency(detectedFreq);
+            const midiNumber = Math.round(
+              12 * (Math.log2(detectedFreq / 440) + 4.75)
+            );
+            setCurrentNote(notes[midiNumber % 12]);
+            setCents(
+              Math.round(
+                (12 * (Math.log2(detectedFreq / 440) + 4.75) - midiNumber) * 100
+              )
+            );
+          }
+        },
+      });
+    }
+  }, [isRecording, isPaused]);
 
   return (
-    <View style={componentStyles.container}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: Colors[colorScheme ?? "light"].background2 },
+      ]}
+    >
       <ThemedText style={styles.note}>{currentNote}</ThemedText>
       <TuningMeter cents={cents} note={currentNote} />
       <ThemedText style={styles.cents}>
-        {frequency.toFixed(1)} Hz | {cents > 0 ? `+${cents}` : cents} cents
+        {frequency
+          ? `${frequency.toFixed(1)} Hz | ${
+              cents > 0 ? `+${cents}` : cents
+            } cents`
+          : "Listening..."}
       </ThemedText>
     </View>
   );
@@ -82,13 +78,9 @@ const ChromaticTuner: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 6,
     justifyContent: "center",
     alignItems: "center",
-  },
-  frequency: {
-    fontSize: 24,
-    marginBottom: 10,
   },
   note: {
     fontSize: 130,
