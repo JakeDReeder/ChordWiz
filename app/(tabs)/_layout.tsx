@@ -42,6 +42,33 @@ export default function RootLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="tuning"
+        options={{
+          lazy: true,
+          headerTitle: () => (
+            <Image
+              source={require("@/assets/images/ChordWiz_transparent.png")}
+              style={{ width: 150 }}
+              resizeMode="contain"
+            />
+          ),
+          headerStyle: {
+            backgroundColor: Colors[colorScheme ?? "light"].secondary,
+          },
+          tabBarStyle: {
+            backgroundColor: Colors[colorScheme ?? "light"].secondary,
+          },
+          tabBarIcon: (
+            { focused }: { focused: boolean } // Explicitly type `focused`
+          ) => (
+            <TabBarIcon
+              name={focused ? "musical-note" : "musical-note-outline"}
+              color={"white"}
+            />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
