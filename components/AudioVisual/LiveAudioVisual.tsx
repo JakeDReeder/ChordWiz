@@ -1,6 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Text } from "react-native";
-import { ThemedText } from "../ThemedText";
+import { View, StyleSheet } from "react-native";
 import { ThemedView } from "../ThemedView";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
@@ -12,17 +11,18 @@ const AudioVisual: React.FC = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 3,
+      backgroundColor: Colors[colorScheme ?? "light"].background3,
     },
   });
-  const { analysisData } = useSharedAudioRecorder();
+  const { analysisData, isRecording } = useSharedAudioRecorder();
   return (
     <ThemedView style={styles.container}>
       {analysisData && (
         <AudioVisualizer
           candleSpace={1}
-          candleWidth={2}
-          canvasHeight={150}
-          mode="live"
+          candleWidth={3}
+          canvasHeight={200}
+          mode={isRecording ? "live" : "static"}
           disableTapSelection={true}
           audioData={analysisData}
           amplitudeScaling="normalized"

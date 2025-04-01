@@ -7,7 +7,11 @@ import { ThemedView } from "../ThemedView";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
 
-const ChordDisplay: React.FC = () => {
+interface Chord {
+  chord: string;
+}
+
+const ChordDisplay: React.FC<Chord> = ({ chord }) => {
   const colorScheme = useColorScheme();
   const styles = StyleSheet.create({
     container: {
@@ -18,13 +22,13 @@ const ChordDisplay: React.FC = () => {
       padding: 20,
     },
     text: {
-      fontSize: 18,
+      fontSize: 30,
     },
   });
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="defaultSemiBold" style={styles.text}>
-        Chord Recognition Currently Unavailable
+      <ThemedText type="defaultBold" style={styles.text}>
+        {chord}
       </ThemedText>
     </ThemedView>
   );
